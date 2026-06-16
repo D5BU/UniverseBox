@@ -18,6 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const canvas = canvasManager.canvas;
 
   canvas.addEventListener('mousedown', (e) => {
+    // Block clicks when landing page is active
+    const landingPage = document.getElementById('landing-page');
+    if (landingPage && !landingPage.classList.contains('hidden-landing')) return;
+
     // Only handle left clicks (button 0) for dragging launcher
     if (e.button !== 0) return;
     
@@ -68,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
   canvas.addEventListener('contextmenu', (e) => {
     e.preventDefault(); // Suppress default browser context menu
     
+    // Block when landing page is active
+    const landingPage = document.getElementById('landing-page');
+    if (landingPage && !landingPage.classList.contains('hidden-landing')) return;
+    
     const blackHole = new Particle({
       x: e.clientX,
       y: e.clientY,
@@ -86,6 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Keyboard Shortcuts Binds
   window.addEventListener('keydown', (e) => {
+    // Block shortcuts if landing page is still active
+    const landingPage = document.getElementById('landing-page');
+    if (landingPage && !landingPage.classList.contains('hidden-landing')) return;
+
     const key = e.key.toLowerCase();
     
     // Ignore keyboard shortcuts if user is typing in forms (though we don't have text fields)
@@ -170,6 +182,35 @@ document.addEventListener('DOMContentLoaded', () => {
     loader.classList.add('fade-out');
     // Remove from DOM after transition completes
     setTimeout(() => loader.remove(), 600);
+  }
+
+  // 9. Launch Simulator button event
+  const landingPage = document.getElementById('landing-page');
+  const btnLaunchSim = document.getElementById('btn-launch-sim');
+  if (btnLaunchSim && landingPage) {
+    btnLaunchSim.addEventListener('click', () => {
+      // Fade out landing page
+      landingPage.classList.add('hidden-landing');
+      
+      // Slide HUD into view (uncollapse)
+      const controlPanel = document.getElementById('control-panel');
+      const inspectorPanel = document.getElementById('inspector-panel');
+      const btnToggleLeft = document.getElementById('btn-toggle-left');
+      const btnToggleRight = document.getElementById('btn-toggle-right');
+
+      if (controlPanel) {
+        controlPanel.classList.remove('collapsed');
+      }
+      if (btnToggleLeft) {
+        btnToggleLeft.textContent = '◀';
+      }
+      if (inspectorPanel) {
+        inspectorPanel.classList.remove('collapsed');
+      }
+      if (btnToggleRight) {
+        btnToggleRight.textContent = '▶';
+      }
+    });
   }
 
   requestAnimationFrame(animate);

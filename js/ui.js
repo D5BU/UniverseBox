@@ -35,6 +35,12 @@ export class UIManager {
     this.btnStep = document.getElementById('btn-step');
     this.btnClear = document.getElementById('btn-clear');
     
+    // Panel Toggles
+    this.btnToggleLeft = document.getElementById('btn-toggle-left');
+    this.btnToggleRight = document.getElementById('btn-toggle-right');
+    this.controlPanel = document.getElementById('control-panel');
+    this.inspectorPanel = document.getElementById('inspector-panel');
+    
     // Selects
     this.presetSelect = document.getElementById('preset-select');
     
@@ -88,6 +94,17 @@ export class UIManager {
     this.btnClear.addEventListener('click', () => {
       this.engine.clear();
       this.energyHistory = [];
+    });
+
+    // 1.5. Sidebar Panel Toggles
+    this.btnToggleLeft.addEventListener('click', () => {
+      const isCollapsed = this.controlPanel.classList.toggle('collapsed');
+      this.btnToggleLeft.textContent = isCollapsed ? '▶' : '◀';
+    });
+
+    this.btnToggleRight.addEventListener('click', () => {
+      const isCollapsed = this.inspectorPanel.classList.toggle('collapsed');
+      this.btnToggleRight.textContent = isCollapsed ? '◀' : '▶';
     });
 
     // 2. Constants Sliders (Direct bindings to engine parameters)

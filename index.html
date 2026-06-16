@@ -10,6 +10,40 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Landing Page Overlay -->
+  <div id="landing-page" class="landing-overlay">
+    <div class="landing-content glass">
+      <div class="landing-logo-orb"></div>
+      <h1 class="landing-title">QUANTUM<span>SANDBOX</span></h1>
+      <p class="landing-subtitle">2D N-Body Gravity & Electrostatic Physics Simulator</p>
+      
+      <div class="landing-features">
+        <div class="landing-feature-card">
+          <span class="feature-icon">🪐</span>
+          <h3>Stable Orbits</h3>
+          <p>Velocity Verlet integration preserves planetary system stability.</p>
+        </div>
+        <div class="landing-feature-card">
+          <span class="feature-icon">⚡</span>
+          <h3>Force Fields</h3>
+          <p>Universal gravity and electrostatic charge interactions.</p>
+        </div>
+        <div class="landing-feature-card">
+          <span class="feature-icon">⚫</span>
+          <h3>Black Holes</h3>
+          <p>Dynamic black holes ingest particles and grow in mass.</p>
+        </div>
+        <div class="landing-feature-card">
+          <span class="feature-icon">📈</span>
+          <h3>Diagnostics</h3>
+          <p>Real-time mechanical energy line chart checking conservation laws.</p>
+        </div>
+      </div>
+      
+      <button id="btn-launch-sim" class="btn primary glowing-btn">Launch Simulator</button>
+    </div>
+  </div>
+
   <!-- Background Physics Canvas -->
   <canvas id="physics-canvas"></canvas>
 
@@ -23,7 +57,8 @@
   </header>
 
   <!-- Left Sidebar: Controls & Parameters -->
-  <aside class="sidebar glass" id="control-panel">
+  <aside class="sidebar glass collapsed" id="control-panel">
+    <button id="btn-toggle-left" class="panel-toggle left" title="Toggle controls">▶</button>
     <div class="section-header">
       <h2>Simulation Control</h2>
     </div>
@@ -125,7 +160,8 @@
   </aside>
 
   <!-- Right Sidebar: Spawner Setup & Diagnostics -->
-  <aside class="sidebar glass right-sidebar" id="inspector-panel">
+  <aside class="sidebar glass right-sidebar collapsed" id="inspector-panel">
+    <button id="btn-toggle-right" class="panel-toggle right" title="Toggle spawner">◀</button>
     <div class="section-header">
       <h2>Particle Spawner</h2>
     </div>
