@@ -13,3 +13,4 @@ Contribution #13: Refined simulation particle dynamics log entry
 Contribution #14: Refined simulation particle dynamics log entry
 Contribution #15: Refined simulation particle dynamics log entry
 Contribution #16: Refined simulation particle dynamics log entry
+Contribution #17: Refined simulation particle dynamics log entry
