@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let dragCurrent = { x: 0, y: 0 };
   const velocityScale = 0.08; // Adjusts drag-to-velocity magnitude
 
+  // Camera Pan State
+  let isPanning = false;
+  let panStart = { x: 0, y: 0 };
+  let camStart = { x: 0, y: 0 };
+
   // 3. Mouse Event Listeners for Particle Creation
   const canvas = canvasManager.canvas;
 
@@ -21,6 +26,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Block clicks when landing page is active
     const landingPage = document.getElementById('landing-page');
     if (landingPage && !landingPage.classList.contains('hidden-landing')) return;
+
+    // Check if middle-click (button 1) OR Shift + Left-click
+    if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+      isPanning = true;
+      panStart.x = e.clientX;
+      panStart.y = e.clientY;
+      camStart.x = canvasManager.camera.x;
+      camStart.y = canvasManager.camera.y;
+      e.preventDefault();
+      return;
+    }
 
     // Only handle left clicks (button 0) for dragging launcher
     if (e.button !== 0) return;
@@ -33,12 +49,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   canvas.addEventListener('mousemove', (e) => {
+    if (isPanning) {
+      const dx = e.clientX - panStart.x;
+      const dy = e.clientY - panStart.y;
+      // Adjust camera focus inversely to pan dragging
+      canvasManager.camera.x = camStart.x - dx / canvasManager.camera.zoom;
+      canvasManager.camera.y = camStart.y - dy / canvasManager.camera.zoom;
+      return;
+    }
+
     if (!isDragging) return;
     dragCurrent.x = e.clientX;
     dragCurrent.y = e.clientY;
   });
 
   window.addEventListener('mouseup', (e) => {
+    if (isPanning) {
+      isPanning = false;
+      return;
+    }
+
     if (!isDragging) return;
     isDragging = false;
 
@@ -46,15 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const dx = dragCurrent.x - dragStart.x;
     const dy = dragCurrent.y - dragStart.y;
     
-    const vx = dx * velocityScale;
-    const vy = dy * velocityScale;
+    // Scale velocity inversely with zoom so drag magnitude is consistent
+    const vx = (dx * velocityScale) / canvasManager.camera.zoom;
+    const vy = (dy * velocityScale) / canvasManager.camera.zoom;
 
     // Spawn config from UI setup
     const config = ui.getSpawnerConfig();
 
+    // Map screen drag starting position to world coordinates
+    const worldPos = canvasManager.screenToWorld(dragStart.x, dragStart.y);
+
     const newParticle = new Particle({
-      x: dragStart.x,
-      y: dragStart.y,
+      x: worldPos.x,
+      y: worldPos.y,
       vx: vx,
       vy: vy,
       mass: config.mass,
@@ -76,9 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const landingPage = document.getElementById('landing-page');
     if (landingPage && !landingPage.classList.contains('hidden-landing')) return;
     
+    const worldPos = canvasManager.screenToWorld(e.clientX, e.clientY);
+
     const blackHole = new Particle({
-      x: e.clientX,
-      y: e.clientY,
+      x: worldPos.x,
+      y: worldPos.y,
       vx: 0,
       vy: 0,
       mass: 8000,
@@ -91,6 +127,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     engine.addParticle(blackHole);
   });
+
+  // Wheel Zoom Listener
+  canvas.addEventListener('wheel', (e) => {
+    const landingPage = document.getElementById('landing-page');
+    if (landingPage && !landingPage.classList.contains('hidden-landing')) return;
+
+    e.preventDefault(); // Disable window scrolling
+
+    const zoomFactor = 1.08;
+    const curZoom = canvasManager.camera.zoom;
+    const mouseWorldBefore = canvasManager.screenToWorld(e.clientX, e.clientY);
+
+    let newZoom;
+    if (e.deltaY < 0) {
+      newZoom = curZoom * zoomFactor;
+    } else {
+      newZoom = curZoom / zoomFactor;
+    }
+
+    newZoom = Math.max(0.04, Math.min(25, newZoom));
+    canvasManager.camera.zoom = newZoom;
+
+    const mouseWorldAfter = canvasManager.screenToWorld(e.clientX, e.clientY);
+    canvasManager.camera.x += mouseWorldBefore.x - mouseWorldAfter.x;
+    canvasManager.camera.y += mouseWorldBefore.y - mouseWorldAfter.y;
+  }, { passive: false });
 
   // 4. Keyboard Shortcuts Binds
   window.addEventListener('keydown', (e) => {

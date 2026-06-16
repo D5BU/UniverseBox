@@ -13,9 +13,34 @@ export class CanvasManager {
     // Grid spacing for Vector Field
     this.gridSpacing = 40;
 
+    // Camera State
+    this.camera = {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+      zoom: 1.0
+    };
+
     // Resizing binds
     this.resizeCanvas();
     window.addEventListener('resize', () => this.resizeCanvas());
+  }
+
+  screenToWorld(screenX, screenY) {
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    return {
+      x: (screenX - w / 2) / this.camera.zoom + this.camera.x,
+      y: (screenY - h / 2) / this.camera.zoom + this.camera.y
+    };
+  }
+
+  worldToScreen(worldX, worldY) {
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    return {
+      x: (worldX - this.camera.x) * this.camera.zoom + w / 2,
+      y: (worldY - this.camera.y) * this.camera.zoom + h / 2
+    };
   }
 
   resizeCanvas() {
@@ -33,22 +58,38 @@ export class CanvasManager {
   }
 
   drawSpaceGrid() {
-    const spacing = 80;
-    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.012)';
-    this.ctx.lineWidth = 1;
+    const spacing = 100;
+    const ctx = this.ctx;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
 
-    this.ctx.beginPath();
-    // Vertical lines
-    for (let x = 0; x < this.canvas.width; x += spacing) {
-      this.ctx.moveTo(x, 0);
-      this.ctx.lineTo(x, this.canvas.height);
+    // Convert corners to world coordinates
+    const leftWorld = (0 - w / 2) / this.camera.zoom + this.camera.x;
+    const rightWorld = (w - w / 2) / this.camera.zoom + this.camera.x;
+    const topWorld = (0 - h / 2) / this.camera.zoom + this.camera.y;
+    const bottomWorld = (h - h / 2) / this.camera.zoom + this.camera.y;
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    // Vertical grid lines
+    const startX = Math.floor(leftWorld / spacing) * spacing;
+    for (let wx = startX; wx <= rightWorld; wx += spacing) {
+      const sx = (wx - this.camera.x) * this.camera.zoom + w / 2;
+      ctx.moveTo(sx, 0);
+      ctx.lineTo(sx, h);
     }
-    // Horizontal lines
-    for (let y = 0; y < this.canvas.height; y += spacing) {
-      this.ctx.moveTo(0, y);
-      this.ctx.lineTo(this.canvas.width, y);
+
+    // Horizontal grid lines
+    const startY = Math.floor(topWorld / spacing) * spacing;
+    for (let wy = startY; wy <= bottomWorld; wy += spacing) {
+      const sy = (wy - this.camera.y) * this.camera.zoom + h / 2;
+      ctx.moveTo(0, sy);
+      ctx.lineTo(w, sy);
     }
-    this.ctx.stroke();
+
+    ctx.stroke();
   }
 
   draw(spawnPreview = null) {
@@ -83,16 +124,19 @@ export class CanvasManager {
       const trail = p.trail;
       if (trail.length < 2) continue;
 
-      this.ctx.lineWidth = p.radius * 0.4;
+      this.ctx.lineWidth = Math.max(0.5, p.radius * 0.4 * this.camera.zoom);
       this.ctx.lineCap = 'round';
       this.ctx.lineJoin = 'round';
 
       // Draw fading trail segments
       for (let j = 1; j < trail.length; j++) {
         const ratio = j / trail.length;
+        const pt1 = this.worldToScreen(trail[j - 1].x, trail[j - 1].y);
+        const pt2 = this.worldToScreen(trail[j].x, trail[j].y);
+
         this.ctx.beginPath();
-        this.ctx.moveTo(trail[j - 1].x, trail[j - 1].y);
-        this.ctx.lineTo(trail[j].x, trail[j].y);
+        this.ctx.moveTo(pt1.x, pt1.y);
+        this.ctx.lineTo(pt2.x, pt2.y);
         
         // Convert hex color to RGBA and fade older segments
         this.ctx.strokeStyle = this.hexToRGBA(p.color, ratio * 0.25);
@@ -117,13 +161,15 @@ export class CanvasManager {
 
   drawStandardParticle(p) {
     const ctx = this.ctx;
+    const screenPos = this.worldToScreen(p.pos.x, p.pos.y);
+    const drawRadius = Math.max(1.5, p.radius * this.camera.zoom);
     
     // Outer Glow
-    ctx.shadowBlur = p.radius * 1.5;
+    ctx.shadowBlur = drawRadius * 1.5;
     ctx.shadowColor = p.color;
     
     ctx.beginPath();
-    ctx.arc(p.pos.x, p.pos.y, p.radius, 0, Math.PI * 2);
+    ctx.arc(screenPos.x, screenPos.y, drawRadius, 0, Math.PI * 2);
     ctx.fillStyle = p.color;
     ctx.fill();
     
@@ -131,33 +177,35 @@ export class CanvasManager {
     ctx.shadowBlur = 0; // reset for core overlay
     
     ctx.beginPath();
-    ctx.arc(p.pos.x - p.radius * 0.25, p.pos.y - p.radius * 0.25, p.radius * 0.3, 0, Math.PI * 2);
+    ctx.arc(screenPos.x - drawRadius * 0.25, screenPos.y - drawRadius * 0.25, drawRadius * 0.3, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.fill();
 
     // Draw Charge Signs (+ / -)
-    if (p.charge !== 0 && p.radius >= 6) {
+    if (p.charge !== 0 && drawRadius >= 6) {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.font = `bold ${Math.floor(p.radius * 1.1)}px var(--font-main)`;
+      ctx.font = `bold ${Math.floor(drawRadius * 1.1)}px var(--font-main)`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
       const symbol = p.charge > 0 ? '+' : '-';
-      ctx.fillText(symbol, p.pos.x, p.pos.y);
+      ctx.fillText(symbol, screenPos.x, screenPos.y);
     }
   }
 
   drawBlackHole(p) {
     const ctx = this.ctx;
+    const screenPos = this.worldToScreen(p.pos.x, p.pos.y);
+    const drawRadius = p.radius * this.camera.zoom;
     p.pulseAge += 0.02; // Rotate accretion disk
 
     ctx.save();
-    ctx.translate(p.pos.x, p.pos.y);
+    ctx.translate(screenPos.x, screenPos.y);
 
     // 1. Glowing outer gravitational lensing halo
     ctx.beginPath();
-    ctx.arc(0, 0, p.radius * 2.8, 0, Math.PI * 2);
-    const radGrad = ctx.createRadialGradient(0, 0, p.radius, 0, 0, p.radius * 2.8);
+    ctx.arc(0, 0, drawRadius * 2.8, 0, Math.PI * 2);
+    const radGrad = ctx.createRadialGradient(0, 0, drawRadius, 0, 0, drawRadius * 2.8);
     radGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
     radGrad.addColorStop(0.2, 'rgba(157, 78, 221, 0.3)');
     radGrad.addColorStop(0.6, 'rgba(0, 242, 254, 0.1)');
@@ -167,29 +215,29 @@ export class CanvasManager {
 
     // 2. Swirling Accretion Disk (Neon orange and violet arcs)
     ctx.rotate(p.pulseAge);
-    ctx.lineWidth = 3;
+    ctx.lineWidth = Math.max(1, 3 * this.camera.zoom);
     ctx.lineCap = 'round';
 
     // Primary Accretion loop
     ctx.beginPath();
-    ctx.arc(0, 0, p.radius * 1.5, 0, Math.PI * 1.4);
+    ctx.arc(0, 0, drawRadius * 1.5, 0, Math.PI * 1.4);
     ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)'; // Amber
     ctx.stroke();
 
     // Secondary Accretion loop (opposite spin, offset)
     ctx.rotate(-p.pulseAge * 2.2);
     ctx.beginPath();
-    ctx.arc(0, 0, p.radius * 1.9, 0, Math.PI * 1.1);
+    ctx.arc(0, 0, drawRadius * 1.9, 0, Math.PI * 1.1);
     ctx.strokeStyle = 'rgba(236, 72, 153, 0.5)'; // Pink/Purple
     ctx.stroke();
 
     ctx.restore();
 
     // 3. Central Event Horizon (Pitch Black Sphere)
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = drawRadius * 0.9;
     ctx.shadowColor = '#9d4edd';
     ctx.beginPath();
-    ctx.arc(p.pos.x, p.pos.y, p.radius, 0, Math.PI * 2);
+    ctx.arc(screenPos.x, screenPos.y, drawRadius, 0, Math.PI * 2);
     ctx.fillStyle = '#020205';
     ctx.fill();
     ctx.shadowBlur = 0; // reset
@@ -203,7 +251,9 @@ export class CanvasManager {
     // Draw vector arrows at grid nodes
     for (let x = this.gridSpacing / 2; x < w; x += this.gridSpacing) {
       for (let y = this.gridSpacing / 2; y < h; y += this.gridSpacing) {
-        const force = this.engine.getNetForceAt(x, y);
+        // Convert screen node to world coordinates
+        const worldPos = this.screenToWorld(x, y);
+        const force = this.engine.getNetForceAt(worldPos.x, worldPos.y);
         const fMag = force.mag();
         
         if (fMag < 0.001) continue;
@@ -280,23 +330,24 @@ export class CanvasManager {
 
     // Draw Particle Spawning Preview Sphere
     ctx.save();
+    const drawRadius = radius * this.camera.zoom;
     if (isBlackHole) {
       // Swirling outer helper
       ctx.beginPath();
-      ctx.arc(startX, startY, radius * 1.5, 0, Math.PI * 2);
+      ctx.arc(startX, startY, drawRadius * 1.5, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
       ctx.lineWidth = 2;
       ctx.stroke();
 
       ctx.beginPath();
-      ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+      ctx.arc(startX, startY, drawRadius, 0, Math.PI * 2);
       ctx.fillStyle = '#080811';
       ctx.shadowBlur = 10;
       ctx.shadowColor = '#9d4edd';
       ctx.fill();
     } else {
       ctx.beginPath();
-      ctx.arc(startX, startY, radius, 0, Math.PI * 2);
+      ctx.arc(startX, startY, drawRadius, 0, Math.PI * 2);
       ctx.fillStyle = this.hexToRGBA(color, 0.6);
       ctx.strokeStyle = color;
       ctx.lineWidth = 2;
@@ -306,7 +357,7 @@ export class CanvasManager {
       // Show charge icon preview
       if (charge !== 0) {
         ctx.fillStyle = '#ffffff';
-        ctx.font = `bold ${Math.floor(radius * 1.1)}px var(--font-main)`;
+        ctx.font = `bold ${Math.floor(drawRadius * 1.1)}px var(--font-main)`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(charge > 0 ? '+' : '-', startX, startY);

@@ -183,7 +183,7 @@ export class PhysicsEngine {
     this.restitution = 0.8;
     this.drag = 0.00;
     this.softeningFactor = 12.0; // Avoid division by zero: epsilon
-    this.boundaryBounce = true;
+    this.boundaryBounce = false;
     this.softCollisions = true;
   }
 

@@ -259,6 +259,14 @@ export class UIManager {
     this.energyHistory = [];
     const w = window.innerWidth;
     const h = window.innerHeight;
+
+    // Reset camera state on preset load
+    if (this.canvasManager && this.canvasManager.camera) {
+      this.canvasManager.camera.x = w / 2;
+      this.canvasManager.camera.y = h / 2;
+      this.canvasManager.camera.zoom = 1.0;
+    }
+
     const center = new Vector2D(w / 2, h / 2);
 
     switch (presetName) {
