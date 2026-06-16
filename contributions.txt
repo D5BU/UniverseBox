@@ -54,3 +54,4 @@ Contribution #54: Refined simulation particle dynamics log entry
 Contribution #55: Refined simulation particle dynamics log entry
 Contribution #56: Refined simulation particle dynamics log entry
 Contribution #57: Refined simulation particle dynamics log entry
+Contribution #58: Refined simulation particle dynamics log entry
