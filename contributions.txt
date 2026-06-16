@@ -1,1 +1,2 @@
 Contribution #2: Refined simulation particle dynamics log entry
+Contribution #3: Refined simulation particle dynamics log entry
