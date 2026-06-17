@@ -246,33 +246,89 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => loader.remove(), 600);
   }
 
-  // 9. Launch Simulator button event
+  // 9. Synapse Landing Page Event Binds & Navigation
   const landingPage = document.getElementById('landing-page');
-  const btnLaunchSim = document.getElementById('btn-launch-sim');
-  if (btnLaunchSim && landingPage) {
-    btnLaunchSim.addEventListener('click', () => {
-      // Fade out landing page
-      landingPage.classList.add('hidden-landing');
-      
-      // Slide HUD into view (uncollapse)
-      const controlPanel = document.getElementById('control-panel');
-      const inspectorPanel = document.getElementById('inspector-panel');
-      const btnToggleLeft = document.getElementById('btn-toggle-left');
-      const btnToggleRight = document.getElementById('btn-toggle-right');
+  
+  if (landingPage) {
+    // A. Bind all launch buttons (Nav pill & Hero)
+    const launchButtons = document.querySelectorAll('.btn-launch');
+    launchButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        landingPage.classList.add('hidden-landing');
+        
+        // Slide HUD sidebars into view
+        const controlPanel = document.getElementById('control-panel');
+        const inspectorPanel = document.getElementById('inspector-panel');
+        const btnToggleLeft = document.getElementById('btn-toggle-left');
+        const btnToggleRight = document.getElementById('btn-toggle-right');
 
-      if (controlPanel) {
-        controlPanel.classList.remove('collapsed');
-      }
-      if (btnToggleLeft) {
-        btnToggleLeft.textContent = '◀';
-      }
-      if (inspectorPanel) {
-        inspectorPanel.classList.remove('collapsed');
-      }
-      if (btnToggleRight) {
-        btnToggleRight.textContent = '▶';
-      }
+        if (controlPanel) controlPanel.classList.remove('collapsed');
+        if (btnToggleLeft) btnToggleLeft.textContent = '◀';
+        if (inspectorPanel) inspectorPanel.classList.remove('collapsed');
+        if (btnToggleRight) btnToggleRight.textContent = '▶';
+      });
     });
+
+    // B. Reveal on Scroll animations for feature cards & code block
+    const revealElements = document.querySelectorAll('.reveal-on-scroll');
+    const checkReveal = () => {
+      const triggerBottom = window.innerHeight * 0.9;
+      revealElements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < triggerBottom) {
+          el.classList.add('active');
+        }
+      });
+    };
+    
+    // Check elements in view on initial load and on scroll
+    checkReveal();
+    landingPage.addEventListener('scroll', checkReveal);
+
+    // C. Preset Links in Footer (auto-load and auto-launch)
+    const presetLinks = document.querySelectorAll('.preset-link');
+    presetLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const preset = link.dataset.preset;
+        if (preset) {
+          // Load preset physics properties
+          ui.loadSimulationPreset(preset);
+          // Sync select dropdown in sidebar
+          const presetSelect = document.getElementById('preset-select');
+          if (presetSelect) presetSelect.value = preset;
+          
+          // Launch the simulator
+          landingPage.classList.add('hidden-landing');
+          
+          const controlPanel = document.getElementById('control-panel');
+          const inspectorPanel = document.getElementById('inspector-panel');
+          const btnToggleLeft = document.getElementById('btn-toggle-left');
+          const btnToggleRight = document.getElementById('btn-toggle-right');
+
+          if (controlPanel) controlPanel.classList.remove('collapsed');
+          if (btnToggleLeft) btnToggleLeft.textContent = '◀';
+          if (inspectorPanel) inspectorPanel.classList.remove('collapsed');
+          if (btnToggleRight) btnToggleRight.textContent = '▶';
+        }
+      });
+    });
+
+    // D. Copy Button inside code editor block
+    const copyBtn = document.querySelector('.code-copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        const codeElement = document.querySelector('.code-block pre code');
+        if (codeElement) {
+          navigator.clipboard.writeText(codeElement.innerText).then(() => {
+            copyBtn.textContent = 'COPIED!';
+            setTimeout(() => {
+              copyBtn.textContent = 'COPY';
+            }, 2000);
+          });
+        }
+      });
+    }
   }
 
   requestAnimationFrame(animate);

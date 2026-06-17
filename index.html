@@ -6,43 +6,172 @@
   <title>QuantumSandbox: 2D Gravity & Electrostatics Physics Simulator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;1,400&family=Inter:wght@300;400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <!-- Landing Page Overlay -->
   <div id="landing-page" class="landing-overlay">
-    <div class="landing-content glass">
-      <div class="landing-logo-orb"></div>
-      <h1 class="landing-title">QUANTUM<span>SANDBOX</span></h1>
-      <p class="landing-subtitle">2D N-Body Gravity & Electrostatic Physics Simulator</p>
+    <!-- Ambient glowing background orbs (vanish in simulation) -->
+    <div class="ambient-orb orb-violet"></div>
+    <div class="ambient-orb orb-cyan"></div>
+    
+    <!-- Fixed Navigation Pill -->
+    <nav class="nav-pill glass">
+      <div class="nav-logo">
+        <span class="logo-dot"></span>
+        <span class="logo-text">Quantum<span>Sandbox</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#code">Docs</a>
+        <a href="#presets">Presets</a>
+      </div>
+      <button class="nav-cta btn-launch">Launch Sim</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <h1 class="hero-title">Simulate the Laws of the <span class="shimmer-text">Universe</span></h1>
+      <p class="hero-subtext">A high-performance 2D N-body physics laboratory for universal gravity, electrostatic fields, and event horizon dynamics. Preserving stability with Velocity Verlet integration.</p>
       
-      <div class="landing-features">
-        <div class="landing-feature-card">
-          <span class="feature-icon">🪐</span>
-          <h3>Stable Orbits</h3>
-          <p>Velocity Verlet integration preserves planetary system stability.</p>
+      <div class="hero-actions">
+        <div class="shiny-border-btn-container">
+          <button id="btn-launch-sim" class="shiny-border-btn btn-launch">Launch Simulator</button>
         </div>
-        <div class="landing-feature-card">
-          <span class="feature-icon">⚡</span>
-          <h3>Force Fields</h3>
-          <p>Universal gravity and electrostatic charge interactions.</p>
+        <a href="#features" class="hero-secondary-link">Explore Features &rarr;</a>
+      </div>
+    </section>
+
+    <!-- Metrics Ticker -->
+    <section class="ticker-section">
+      <div class="ticker-wrapper">
+        <div class="ticker-track">
+          <span>INTEGRATOR / VERLET</span>
+          <span>N-BODY / O(N²)</span>
+          <span>GRAVITY CONSTANT / 1.00</span>
+          <span>COULOMB CONSTANT / 5.00</span>
+          <span>CHARGES / DIPOLE/QUAD</span>
+          <span>ACC EL / ELASTIC</span>
+          <span>BLACK-HOLES / DYNAMIC</span>
+          <span>FPS / 60.00</span>
+          <!-- Duplicate for loop -->
+          <span>INTEGRATOR / VERLET</span>
+          <span>N-BODY / O(N²)</span>
+          <span>GRAVITY CONSTANT / 1.00</span>
+          <span>COULOMB CONSTANT / 5.00</span>
+          <span>CHARGES / DIPOLE/QUAD</span>
+          <span>ACC EL / ELASTIC</span>
+          <span>BLACK-HOLES / DYNAMIC</span>
+          <span>FPS / 60.00</span>
         </div>
-        <div class="landing-feature-card">
-          <span class="feature-icon">⚫</span>
-          <h3>Black Holes</h3>
-          <p>Dynamic black holes ingest particles and grow in mass.</p>
+      </div>
+    </section>
+
+    <!-- Feature Grid -->
+    <section class="features-section" id="features">
+      <div class="section-header-centered">
+        <span class="section-label">SIMULATOR ENGINE</span>
+        <h2 class="section-title">Core Architecture</h2>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card reveal-on-scroll">
+          <div class="feature-icon-box">🪐</div>
+          <h3 class="feature-card-title">Stable Orbit Mechanics</h3>
+          <p class="feature-card-desc">Velocity Verlet integration preserves physical mechanical energy, supporting planetary systems without numerical decay.</p>
         </div>
-        <div class="landing-feature-card">
-          <span class="feature-icon">📈</span>
-          <h3>Diagnostics</h3>
-          <p>Real-time mechanical energy line chart checking conservation laws.</p>
+        
+        <div class="feature-card reveal-on-scroll">
+          <div class="feature-icon-box">⚡</div>
+          <h3 class="feature-card-title">Electrostatic Fields</h3>
+          <p class="feature-card-desc">Universal Coulomb attractions and repulsions with softening factors to prevent singular overlaps.</p>
+        </div>
+        
+        <div class="feature-card reveal-on-scroll">
+          <div class="feature-icon-box">⚫</div>
+          <h3 class="feature-card-title">Event Horizon Ingestion</h3>
+          <p class="feature-card-desc">Massive black holes dynamically swallow adjacent particles, conserving mass and momentum to expand their gravity wells.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Code Block Section -->
+    <section class="code-section" id="code">
+      <div class="section-header-centered">
+        <span class="section-label">INTEGRATOR CODE</span>
+        <h2 class="section-title">Numerical Integration</h2>
+      </div>
+
+      <div class="code-block glass reveal-on-scroll">
+        <div class="code-header">
+          <div class="code-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
+          <span class="code-filename">engine.js</span>
+          <span class="code-copy-btn">COPY</span>
+        </div>
+        <pre class="code-content"><code><span class="code-keyword">import</span> { Vector2D } <span class="code-keyword">from</span> <span class="code-string">"./vector.js"</span>;
+
+<span class="code-keyword">export class</span> <span class="code-class">PhysicsEngine</span> {
+  <span class="code-keyword">constructor</span>() {
+    <span class="code-keyword">this</span>.particles = [];
+    <span class="code-keyword">this</span>.gravityConstant = <span class="code-number">1.0</span>;
+    <span class="code-keyword">this</span>.coulombConstant = <span class="code-number">5.0</span>;
+  }
+
+  <span class="code-comment">// Velocity Verlet integration step</span>
+  <span class="code-class">step</span>(dt) {
+    <span class="code-keyword">this</span>.particles.forEach(p => p.integratePosition(dt));
+    <span class="code-keyword">this</span>.resolveGravitationalForces();
+    <span class="code-keyword">this</span>.particles.forEach(p => p.integrateVelocity(dt));
+  }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer" id="presets">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="footer-logo">Quantum<span>Sandbox</span></span>
+          <p class="footer-brand-subtext">A client-side 2D gravitational and electrostatic physics laboratory built with pure WebGL/Canvas.</p>
+        </div>
+        
+        <div class="footer-col">
+          <span class="footer-col-header">PRESETS</span>
+          <a href="#" class="preset-link" data-preset="solar-system">Solar System</a>
+          <a href="#" class="preset-link" data-preset="galaxy-collision">Galaxy Collision</a>
+          <a href="#" class="preset-link" data-preset="three-body">Chaotic 3-Body</a>
+          <a href="#" class="preset-link" data-preset="electrostatic-trap">Coulomb Trap</a>
+          <a href="#" class="preset-link" data-preset="binary-black-holes">Binary Black Holes</a>
+        </div>
+        
+        <div class="footer-col">
+          <span class="footer-col-header">INTEGRATIONS</span>
+          <a href="#code">Verlet Engine</a>
+          <a href="#features">Feature Grid</a>
+          <a href="https://github.com/D5BU/UniverseBox" target="_blank">Git Repository</a>
+        </div>
+        
+        <div class="footer-col">
+          <span class="footer-col-header">TECHNOLOGY</span>
+          <a href="#">HTML5 Canvas</a>
+          <a href="#">Vanilla JS ES6</a>
+          <a href="#">CSS3 Variables</a>
         </div>
       </div>
       
-      <button id="btn-launch-sim" class="btn primary glowing-btn">Launch Simulator</button>
-    </div>
-  </div>
+      <div class="footer-bottom">
+        <span class="footer-copyright">&copy; 2026 QuantumSandbox. Built on Synapse design tokens.</span>
+        <div class="footer-status">
+          <span class="status-dot pulsing"></span>
+          <span class="status-text">All Systems Operational</span>
+        </div>
+      </div>
+    </footer>
 
   <!-- Background Physics Canvas -->
   <canvas id="physics-canvas"></canvas>
