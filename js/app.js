@@ -256,6 +256,14 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => {
         landingPage.classList.add('hidden-landing');
         
+        // Ensure canvas size is updated and synced immediately on launch
+        canvasManager.resizeCanvas();
+        
+        // Completely remove landing page from DOM rendering layout after transition finishes
+        setTimeout(() => {
+          landingPage.style.display = 'none';
+        }, 800);
+        
         // Slide HUD sidebars into view
         const controlPanel = document.getElementById('control-panel');
         const inspectorPanel = document.getElementById('inspector-panel');
@@ -301,6 +309,14 @@ document.addEventListener('DOMContentLoaded', () => {
           // Launch the simulator
           landingPage.classList.add('hidden-landing');
           
+          // Ensure canvas size is updated and synced immediately on launch
+          canvasManager.resizeCanvas();
+          
+          // Completely remove landing page from DOM rendering layout after transition finishes
+          setTimeout(() => {
+            landingPage.style.display = 'none';
+          }, 800);
+          
           const controlPanel = document.getElementById('control-panel');
           const inspectorPanel = document.getElementById('inspector-panel');
           const btnToggleLeft = document.getElementById('btn-toggle-left');
@@ -330,6 +346,11 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
+
+  // Expose globally for debugging
+  window.engine = engine;
+  window.canvasManager = canvasManager;
+  window.ui = ui;
 
   requestAnimationFrame(animate);
 });
